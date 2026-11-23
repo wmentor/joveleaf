@@ -3,16 +3,17 @@ package joveleaf
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 // notebookV3Raw represents the raw structure of a nbformat v3 notebook.
 type notebookV3Raw struct {
-	Metadata    json.RawMessage `json:"metadata"`
-	NBFormat    int             `json:"nbformat"`
-	NBFormatMinor int           `json:"nbformat_minor"`
-	Worksheets  []worksheetV3   `json:"worksheets"`
+	Metadata      json.RawMessage `json:"metadata"`
+	NBFormat      int             `json:"nbformat"`
+	NBFormatMinor int             `json:"nbformat_minor"`
+	Worksheets    []worksheetV3   `json:"worksheets"`
 }
 
 type worksheetV3 struct {
@@ -20,39 +21,39 @@ type worksheetV3 struct {
 }
 
 type cellV3 struct {
-	CellType       string          `json:"cell_type"`
-	Source         StringOrList    `json:"source"`
-	Input          StringOrList    `json:"input"` // v3 uses "input" instead of "source"
-	Metadata       json.RawMessage `json:"metadata,omitempty"`
+	CellType string          `json:"cell_type"`
+	Source   StringOrList    `json:"source"`
+	Input    StringOrList    `json:"input"` // v3 uses "input" instead of "source"
+	Metadata json.RawMessage `json:"metadata,omitempty"`
 	// Code cell fields
-	Language       string          `json:"language,omitempty"`
-	Collapsed      *bool           `json:"collapsed,omitempty"`
-	Outputs        []outputV3      `json:"outputs,omitempty"`
-	PromptNumber   *int            `json:"prompt_number,omitempty"`
+	Language     string     `json:"language,omitempty"`
+	Collapsed    *bool      `json:"collapsed,omitempty"`
+	Outputs      []outputV3 `json:"outputs,omitempty"`
+	PromptNumber *int       `json:"prompt_number,omitempty"`
 	// Heading cell fields
-	Level          int             `json:"level,omitempty"`
+	Level int `json:"level,omitempty"`
 	// Markdown cell fields (same as source)
 }
 
 type outputV3 struct {
-	OutputType     string                 `json:"output_type"`
+	OutputType string `json:"output_type"`
 	// stream
-	Stream         string                 `json:"stream,omitempty"`
-	Text           StringOrList           `json:"text,omitempty"`
+	Stream string       `json:"stream,omitempty"`
+	Text   StringOrList `json:"text,omitempty"`
 	// display_data / pyout
-	MimeType       string                 `json:"mime_type,omitempty"`
-	Data           map[string]StringOrList `json:"data,omitempty"`
-	PromptNumber   *int                   `json:"prompt_number,omitempty"`
+	MimeType     string                  `json:"mime_type,omitempty"`
+	Data         map[string]StringOrList `json:"data,omitempty"`
+	PromptNumber *int                    `json:"prompt_number,omitempty"`
 	// png, jpeg, etc. (v3 stores images at top level)
-	PNG            string                 `json:"png,omitempty"`
-	JPEG           string                 `json:"jpeg,omitempty"`
-	HTML           StringOrList           `json:"html,omitempty"`
-	Latex          StringOrList           `json:"latex,omitempty"`
-	SVG            StringOrList           `json:"svg,omitempty"`
+	PNG   string       `json:"png,omitempty"`
+	JPEG  string       `json:"jpeg,omitempty"`
+	HTML  StringOrList `json:"html,omitempty"`
+	Latex StringOrList `json:"latex,omitempty"`
+	SVG   StringOrList `json:"svg,omitempty"`
 	// error / pyerr
-	EnName         string                 `json:"ename,omitempty"`
-	EnValue        string                 `json:"evalue,omitempty"`
-	Traceback      []string               `json:"traceback,omitempty"`
+	EnName    string   `json:"ename,omitempty"`
+	EnValue   string   `json:"evalue,omitempty"`
+	Traceback []string `json:"traceback,omitempty"`
 }
 
 // parseV3 parses a nbformat v3 notebook and normalizes it to v4.
@@ -116,11 +117,11 @@ func convertCellV3toV4(c cellV3) (*Cell, error) {
 		// In v3, headings are separate cells with a level.
 		// In v4, they are markdown cells with # headings.
 		cell.CellType = "markdown"
-		prefix := ""
+		var prefix strings.Builder
 		for i := 0; i < c.Level; i++ {
-			prefix += "#"
+			prefix.WriteString("#")
 		}
-		cell.Source = StringOrList(fmt.Sprintf("%s %s", prefix, string(cell.Source)))
+		cell.Source = StringOrList(fmt.Sprintf("%s %s", prefix.String(), string(cell.Source)))
 
 	case "raw":
 		cell.CellType = "raw"
@@ -173,8 +174,8 @@ func convertOutputV3toV4(o outputV3) *Output {
 // buildDataBundleV3 builds a v4 mime-bundle from v3 output fields.
 // In v3, mime types can be stored either in the "data" map or at the top level
 // of the output object (e.g., "text", "html", "png" as direct keys).
-func buildDataBundleV3(o outputV3) map[string]interface{} {
-	data := make(map[string]interface{})
+func buildDataBundleV3(o outputV3) map[string]any {
+	data := make(map[string]any)
 
 	// First, copy from the "data" map if present
 	if o.Data != nil {

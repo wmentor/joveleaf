@@ -59,7 +59,7 @@ func TestRun_File(t *testing.T) {
 		]
 	}`
 
-	if err := os.WriteFile(inPath, []byte(notebook), 0644); err != nil {
+	if err := os.WriteFile(inPath, []byte(notebook), 0o644); err != nil {
 		t.Fatalf("write test file: %v", err)
 	}
 
@@ -96,10 +96,10 @@ func TestRun_MultipleFiles(t *testing.T) {
 		}`
 	}
 
-	if err := os.WriteFile(file1, []byte(nb("AAA")), 0644); err != nil {
+	if err := os.WriteFile(file1, []byte(nb("AAA")), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(file2, []byte(nb("BBB")), 0644); err != nil {
+	if err := os.WriteFile(file2, []byte(nb("BBB")), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -123,7 +123,7 @@ func TestRun_InvalidNotebook(t *testing.T) {
 
 	dir := t.TempDir()
 	bad := filepath.Join(dir, "bad.ipynb")
-	if err := os.WriteFile(bad, []byte("not json"), 0644); err != nil {
+	if err := os.WriteFile(bad, []byte("not json"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
