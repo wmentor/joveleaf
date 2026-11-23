@@ -176,7 +176,7 @@ func TestToMarkdown_Basic(t *testing.T) {
 			{
 				CellType:       "code",
 				Source:         "print('hello')",
-				ExecutionCount: intPtr(1),
+				ExecutionCount: new(1),
 				Outputs: []Output{
 					{
 						OutputType: "stream",
@@ -244,7 +244,7 @@ func TestToMarkdown_Error(t *testing.T) {
 func TestWriteMimeBundle_SVG(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"image/svg+xml": "<svg>test</svg>",
 		"text/plain":    "<graphviz.dot.Digraph at 0x123>",
 	}
@@ -264,7 +264,7 @@ func TestWriteMimeBundle_SVG(t *testing.T) {
 func TestWriteMimeBundle_HTML(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"text/html":  "<table><tr><td>data</td></tr></table>",
 		"text/plain": "<pandas.DataFrame>",
 	}
@@ -284,7 +284,7 @@ func TestWriteMimeBundle_HTML(t *testing.T) {
 func TestWriteMimeBundle_TextPlain_NoRaster(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"text/plain": "some actual data",
 	}
 
@@ -300,7 +300,7 @@ func TestWriteMimeBundle_TextPlain_NoRaster(t *testing.T) {
 func TestWriteMimeBundle_TextPlain_WithRaster(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"text/plain": "<Figure size 720x576>",
 		"image/png":  "base64data",
 	}
@@ -324,7 +324,7 @@ func TestWriteMimeBundle_TextPlain_WithRaster(t *testing.T) {
 func TestWriteMimeBundle_JSON(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"application/json": `{"key": "value"}`,
 	}
 
@@ -344,8 +344,8 @@ func TestWriteMimeBundle_ObjectMimeType(t *testing.T) {
 	t.Parallel()
 
 	// Test that object mime types (like widget-view+json) are handled gracefully
-	data := map[string]interface{}{
-		"application/vnd.jupyter.widget-view+json": map[string]interface{}{
+	data := map[string]any{
+		"application/vnd.jupyter.widget-view+json": map[string]any{
 			"model_id": "55e9b3adbda8474e87f39a259b6c1602",
 		},
 	}
@@ -563,18 +563,12 @@ func TestReadToMarkdown_GoldenFiles(t *testing.T) {
 			if actual != expected {
 				t.Errorf("output for %q does not match %q", tc.input, tc.golden)
 				t.Errorf("expected length: %d, actual length: %d", len(expected), len(actual))
-				
+
 				// Find first difference
 				for i := 0; i < len(expected) && i < len(actual); i++ {
 					if expected[i] != actual[i] {
-						start := i - 50
-						if start < 0 {
-							start = 0
-						}
-						end := i + 50
-						if end > len(expected) {
-							end = len(expected)
-						}
+						start := max(i-50, 0)
+						end := min(i+50, len(expected))
 						t.Errorf("first difference at position %d", i)
 						t.Errorf("expected around diff: %q", expected[start:end])
 						t.Errorf("actual around diff:   %q", actual[start:end])
@@ -586,6 +580,7 @@ func TestReadToMarkdown_GoldenFiles(t *testing.T) {
 	}
 }
 
+//go:fix inline
 func intPtr(v int) *int {
-	return &v
+	return new(v)
 }

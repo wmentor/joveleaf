@@ -198,7 +198,7 @@ func writeErrorOutput(b *strings.Builder, output *Output) {
 // Raster images (png, jpeg) are ignored as per requirements.
 // text/plain is skipped when raster images are present, because in that case
 // text/plain is typically just a Python repr like "<Figure size 720x576>".
-func writeMimeBundle(b *strings.Builder, data map[string]interface{}, execCount *int) {
+func writeMimeBundle(b *strings.Builder, data map[string]any, execCount *int) {
 	if len(data) == 0 {
 		return
 	}
@@ -213,8 +213,8 @@ func writeMimeBundle(b *strings.Builder, data map[string]interface{}, execCount 
 
 	// Try rich mime types first
 	type mimeHandler struct {
-		mime  string
-		lang  string
+		mime string
+		lang string
 	}
 	handlers := []mimeHandler{
 		{"image/svg+xml", "svg"},
@@ -288,13 +288,13 @@ func writeMimeBundle(b *strings.Builder, data map[string]interface{}, execCount 
 
 // extractString extracts a string from an interface{} value.
 // Handles string, []string (joined), []interface{} (joined), and other types.
-func extractString(v interface{}) string {
+func extractString(v any) string {
 	switch val := v.(type) {
 	case string:
 		return val
 	case []string:
 		return strings.Join(val, "")
-	case []interface{}:
+	case []any:
 		parts := make([]string, 0, len(val))
 		for _, item := range val {
 			if s, ok := item.(string); ok {

@@ -2,18 +2,18 @@ package joveleaf
 
 // Notebook represents a parsed Jupyter notebook (nbformat v4 after normalization).
 type Notebook struct {
-	Metadata    Metadata `json:"metadata"`
-	NBFormat    int      `json:"nbformat"`
-	NBFormatMinor int    `json:"nbformat_minor"`
-	Cells       []Cell   `json:"cells"`
+	Metadata      Metadata `json:"metadata"`
+	NBFormat      int      `json:"nbformat"`
+	NBFormatMinor int      `json:"nbformat_minor"`
+	Cells         []Cell   `json:"cells"`
 }
 
 // Metadata holds notebook-level metadata.
 type Metadata struct {
-	KernelInfo    *KernelInfo    `json:"kernel_info,omitempty"`
-	LanguageInfo  *LanguageInfo  `json:"language_info,omitempty"`
-	Kernelspec    *Kernelspec    `json:"kernelspec,omitempty"`
-	Authors       []Author       `json:"authors,omitempty"`
+	KernelInfo   *KernelInfo   `json:"kernel_info,omitempty"`
+	LanguageInfo *LanguageInfo `json:"language_info,omitempty"`
+	Kernelspec   *Kernelspec   `json:"kernelspec,omitempty"`
+	Authors      []Author      `json:"authors,omitempty"`
 }
 
 // KernelInfo describes the kernel.
@@ -23,9 +23,9 @@ type KernelInfo struct {
 
 // LanguageInfo describes the programming language.
 type LanguageInfo struct {
-	Name           string      `json:"name"`
-	Version        string      `json:"version,omitempty"`
-	CodemirrorMode interface{} `json:"codemirror_mode,omitempty"` // string or object
+	Name           string `json:"name"`
+	Version        string `json:"version,omitempty"`
+	CodemirrorMode any    `json:"codemirror_mode,omitempty"` // string or object
 }
 
 // Kernelspec is the kernel specification.
@@ -42,34 +42,34 @@ type Author struct {
 
 // Cell represents a single notebook cell.
 type Cell struct {
-	CellType       string         `json:"cell_type"`
-	Source         StringOrList   `json:"source"`
-	Metadata       CellMetadata   `json:"metadata,omitempty"`
+	CellType string       `json:"cell_type"`
+	Source   StringOrList `json:"source"`
+	Metadata CellMetadata `json:"metadata"`
 	// Code cell fields
-	ExecutionCount *int           `json:"execution_count,omitempty"`
-	Outputs        []Output       `json:"outputs,omitempty"`
+	ExecutionCount *int     `json:"execution_count,omitempty"`
+	Outputs        []Output `json:"outputs,omitempty"`
 	// Raw/Markdown cell field
-	Attachments    map[string]map[string]interface{} `json:"attachments,omitempty"`
+	Attachments map[string]map[string]any `json:"attachments,omitempty"`
 	// Cell id (since v4.5)
-	ID             string         `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 }
 
 // CellMetadata holds cell-level metadata.
 type CellMetadata struct {
-	Collapsed    *bool    `json:"collapsed,omitempty"`
-	Scrolled     interface{} `json:"scrolled,omitempty"` // bool or "auto"
-	Deletable    *bool    `json:"deletable,omitempty"`
-	Editable     *bool    `json:"editable,omitempty"`
-	Format       string   `json:"format,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	Tags         []string `json:"tags,omitempty"`
-	Jupyter      *JupyterMeta  `json:"jupyter,omitempty"`
-	Execution    *ExecutionMeta `json:"execution,omitempty"`
+	Collapsed *bool          `json:"collapsed,omitempty"`
+	Scrolled  any            `json:"scrolled,omitempty"` // bool or "auto"
+	Deletable *bool          `json:"deletable,omitempty"`
+	Editable  *bool          `json:"editable,omitempty"`
+	Format    string         `json:"format,omitempty"`
+	Name      string         `json:"name,omitempty"`
+	Tags      []string       `json:"tags,omitempty"`
+	Jupyter   *JupyterMeta   `json:"jupyter,omitempty"`
+	Execution *ExecutionMeta `json:"execution,omitempty"`
 }
 
 // JupyterMeta holds jupyter-specific cell metadata.
 type JupyterMeta struct {
-	SourceHidden *bool `json:"source_hidden,omitempty"`
+	SourceHidden  *bool `json:"source_hidden,omitempty"`
 	OutputsHidden *bool `json:"outputs_hidden,omitempty"`
 }
 
@@ -88,8 +88,8 @@ type Output struct {
 	Name string       `json:"name,omitempty"`
 	Text StringOrList `json:"text,omitempty"`
 	// display_data / execute_result
-	Data           map[string]interface{} `json:"data,omitempty"`
-	ExecutionCount *int                   `json:"execution_count,omitempty"`
+	Data           map[string]any `json:"data,omitempty"`
+	ExecutionCount *int           `json:"execution_count,omitempty"`
 	// error output
 	EnName    string   `json:"ename,omitempty"`
 	EnValue   string   `json:"evalue,omitempty"`
